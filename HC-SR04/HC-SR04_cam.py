@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
- 
+
+#import 
 import time
 import RPi.GPIO as GPIO
 import datetime
@@ -70,6 +71,7 @@ try:
 
         # 초음파는 반사파이기 때문에 실제 이동 거리는 2배이다. 따라서 2로 나눈다.
         # 음속은 편의상 340m/s로 계산한다. 현재 온도를 반영해서 보정할 수 있다.
+        # 거리 판별 조건(10cm)이내로 측정시 카메라촬영.
         if (stop and start):
             distance = (elapsed * 34000.0) / 2
             print("Distance : %.1f cm" % distance)
