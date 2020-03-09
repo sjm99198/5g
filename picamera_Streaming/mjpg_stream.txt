@@ -1,0 +1,45 @@
+----------명령프롬프트로 라즈파이 카메라 스트리밍----------------------
+
+1.
+#명령프롬프트 실행
+
+2. #picamera 업그레이드 및 업데이트
+
+	sudo apt-get update && upgrade
+
+3. #Mjpg-stream 컴파일을 위한 라이브러리 및 cmake 패키지를 설치
+
+	sudo apt-get install git cmake libjpeg8-de v imagemagick -y
+
+4. #videodev.h 헤더파일을 변경된 videodev2.h 파일로 링크
+
+	sudo ln -s /usr/include/linux/videodev2.h /usr/include/linux/videodev.h
+
+5. #mjpg-streamer 깃허브에서 다운로드
+
+	git clone https://github.com/liamfraser/mjpg-streamer 
+	
+6. #디렉토리 이동
+
+ 	cd ~/mjpg-streamer/mjpg-streamer-experimental
+
+7. #컴파일링
+
+	make clean all
+
+8.nano코딩프로그램을 이용한 코딩
+8-1.  mjpg이름으로된 sh파일 생성및 오픈
+	sudo nano mjpg.sh
+
+8-2. nano가 켜졌다면 다음 타이핑으로 코딩
+	export STREAMER_PATH=$HOME/mjpg-streamer/mjpg-streamer-experimental
+	export LD_LIBRARY_PATH=$STREAMER_PATH
+	$STREAMER_PATH/mjpg_streamer -i "input_raspicam.so -d 200" -o "output_http.so -w $STREAMER_PATH/www"
+
+9. 코딩 세이브 CTRL-X 를 누르고 Y 누르고 Enter 저장
+10.스트리밍 서버
+	https://라즈베리파이 아이피 :8080
+
+
+11.아이피를 사용하여 html의 iframe 기능으로 송출화면 구성 
+	
