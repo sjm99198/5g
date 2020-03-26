@@ -6,73 +6,32 @@ import time
 import RPi.GPIO as GPIO
 import datetime
 import picamera
-
-#request
 import requests
+from flask import Flask
+#모둘 불러오기
+import setroad as setting
+from CCTV_module0502 import securityshot, securityrec
 
 #핀 넘버링을 BCM 방식을 사용한다.
 GPIO.setmode(GPIO.BCM)
  
-# HC-SR04의 트리거 핀을 GPIO 17번, 에코핀을 GPIO 27번에 연결한다.
+# HC-SR04의 트리거 핀8을 GPIO 17번, 에코핀을 GPIO 27번에 연결한다.
 GPIO_TRIGGER = 21
 GPIO_ECHO = 25
-#서버 URL 설정
-url ='http://192.168.0.6:8080/iot/test1.html'
+
+acc = 1
 
 
-#############################################################################
-#사진촬영 함수 설정
-def securityshot ():
-#PiCamera 객체 인스턴스 생성
-    with picamera.PiCamera() as camera:
-
-#해상도 선택 목록
-        camera.resolution = (320, 240)
-        now= datetime.datetime.now()
-        
-#파일명 입력받기
-        file_name = '{}{}{}{}{}{}{}.jpg'.format(
-            now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond
-        )
-#프리뷰화면 표시
-        camera.start_preview()
-        time.sleep(1)
-        camera.capture(file_name)
-#파일전송
-        files = {'file':open(file_name,'rb')}
-        print(file_name)
-        r=requests.post(url,files=files)
-        print(r.status_code)
-
-################################################################################
-################################################################################
-#영상 녹화 함수 설정
-def securityrec ():
-    with picamera.PiCamera() as camera:
-        camera.resolution = (320, 240)
-        #파일명 입력받기
-        file_name = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-        #프리뷰 화면
-        camera.start_preview()
-
-        #촬영과 저장
-        camera.start_recording(output = file_name+'.h264')
-        camera.wait_recording(10)
-        camera.stop_preview()
-        camera.stop_recording()
-        #파일전송
-        files = {'file':open(file_name+'.h264','rb')}
-        print(file_name)
-        r=requests.post(url,files=files)
-        print(r.status_code)
-################################################################################
+now = datetime.datetime.now()
+app = Flask(__name__)
 
 print("Ultrasonic Distance Measurement")
  
 # 초음파를 내보낼 트리거 핀은 출력 모드로, 반사파를 수신할 에코 피은 입력 모드로 설정한다.
 GPIO.setup(GPIO_TRIGGER,GPIO.OUT) 
 GPIO.setup(GPIO_ECHO,GPIO.IN)
- 
+
+#############################################################################
 try:
     while True:
         stop = 0
@@ -106,9 +65,15 @@ try:
             distance = (elapsed * 34000.0) / 2
             print("Distance : %.1f cm" % distance)
             if 10 < distance <= 30:
+                print('road set:'+setting)
+                turningset(setting)
+                time.sleep(0.001)
                 securityshot()
                 print('shot')
             elif distance <= 10:
+                print('road set:'+setting)
+                turningset(setting)
+                time.sleep(0.001)
                 securityrec()
                 print('rec')
 
@@ -117,5 +82,11 @@ except KeyboardInterrupt:
     GPIO.cleanup()
 
 
-# Reset GPIO settings
-GPIO.cleanup()
+
+###################################################################################
+#변수 리턴
+def turningset(setting):
+    settingturn=setting
+    print('turning:'+settingturn)
+    return settingturn
+###################################################################################

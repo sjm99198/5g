@@ -6,7 +6,7 @@ import time
 import RPi.GPIO as GPIO
 import datetime
 import picamera
-
+from fingerprint_test0 import ac
 #request
 import requests
 
@@ -18,7 +18,7 @@ GPIO_TRIGGER = 21
 GPIO_ECHO = 25
 #서버 URL 설정
 url ='http://192.168.0.6:8080/iot/test1.html'
-
+ac = ac
 
 #############################################################################
 #사진촬영 함수 설정
@@ -108,7 +108,7 @@ try:
             if 10 < distance <= 30:
                 securityshot()
                 print('shot')
-            elif distance <= 10:
+            elif distance <= 10 and ac == 1 :
                 securityrec()
                 print('rec')
 

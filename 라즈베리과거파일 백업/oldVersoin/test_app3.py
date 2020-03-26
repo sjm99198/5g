@@ -20,19 +20,28 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 
 # 핀번호 설정 : chanel
-pin = 18  # 서보모터 18핀
-
+SERVOR1 = 18  # 초록색 LED
 
 # 11번 핀 출력 핀으로 등록, 초기 출력은 LOW = 0  False
-GPIO.setup(pin, GPIO.OUT)
-SERVO = GPIO.PWM(pin, 50)
-SERVO.start(0)
+GPIO.setup(SERVOR1, GPIO.OUT )
 
 
+#pwm객체 인스턴스
+#출력핀:18 주파수 50Hz
+p = GPIO.PWM(SERVOR1, 50)
+#PWM 신호 출력
+p.start(0)
 
 #duty값을 변경 항수
 def change_duty(dc):
-        SERVO.ChangeDutyCycle(dc)
+    p.ChangeDutyCycle(dc)
+    
+    
+
+
+
+
+
 
 
 #####################################################
@@ -42,10 +51,17 @@ def change_duty(dc):
 #변수설정
 app = Flask(__name__)
 CORS(app)
-
-@app.route('/1')
+@app.route('/')
 def index():
-    change_duty(6.5)
+
+    moter = request.args.get('moter', 'm')
+    p_val = request.args.get('p_val','0')
+
+    change_duty(int(p_val))
+
+        
+
+    return moter + ':' + p_val
 
 if __name__ ==  '__main__':
-    app.run(host='192.168.0.78',port="8090")
+    app.run(host='192.168.0.78',port="5050")

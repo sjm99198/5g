@@ -1,23 +1,4 @@
-#!/usr/bin/env python
-#-*- coding: utf-8 -*-
-
-#import 
-import time
-import RPi.GPIO as GPIO
-import datetime
-import picamera
-
-#request
-import requests
-
-#핀 넘버링을 BCM 방식을 사용한다.
-GPIO.setmode(GPIO.BCM)
- 
-# HC-SR04의 트리거 핀을 GPIO 17번, 에코핀을 GPIO 27번에 연결한다.
-GPIO_TRIGGER = 21
-GPIO_ECHO = 25
-#서버 URL 설정
-url ='http://192.168.0.6:8080/iot/test1.html'
+#모듈 메인파일
 
 
 #############################################################################
@@ -66,15 +47,8 @@ def securityrec ():
         r=requests.post(url,files=files)
         print(r.status_code)
 ################################################################################
-
-print("Ultrasonic Distance Measurement")
- 
-# 초음파를 내보낼 트리거 핀은 출력 모드로, 반사파를 수신할 에코 피은 입력 모드로 설정한다.
-GPIO.setup(GPIO_TRIGGER,GPIO.OUT) 
-GPIO.setup(GPIO_ECHO,GPIO.IN)
- 
-try:
-    while True:
+################################################################################
+def mettersensor ():
         stop = 0
         start = 0
         # 먼저 트리거 핀을 OFF 상태로 유지한다
@@ -101,21 +75,8 @@ try:
 
         # 초음파는 반사파이기 때문에 실제 이동 거리는 2배이다. 따라서 2로 나눈다.
         # 음속은 편의상 340m/s로 계산한다. 현재 온도를 반영해서 보정할 수 있다.
-        # 거리 판별 조건(10cm)이내로 측정시 카메라촬영.
         if (stop and start):
             distance = (elapsed * 34000.0) / 2
             print("Distance : %.1f cm" % distance)
-            if 10 < distance <= 30:
-                securityshot()
-                print('shot')
-            elif distance <= 10:
-                securityrec()
-                print('rec')
-
-except KeyboardInterrupt:   
-    print("Ultrasonic Distance Measurement End")
-    GPIO.cleanup()
-
-
-# Reset GPIO settings
-GPIO.cleanup()
+            return distance
+#####################################################################################

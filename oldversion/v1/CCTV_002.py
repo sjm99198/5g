@@ -6,9 +6,11 @@ import time
 import RPi.GPIO as GPIO
 import datetime
 import picamera
-
-#request
 import requests
+import subprocess
+
+
+from flask import Flask
 
 #핀 넘버링을 BCM 방식을 사용한다.
 GPIO.setmode(GPIO.BCM)
@@ -16,10 +18,12 @@ GPIO.setmode(GPIO.BCM)
 # HC-SR04의 트리거 핀을 GPIO 17번, 에코핀을 GPIO 27번에 연결한다.
 GPIO_TRIGGER = 21
 GPIO_ECHO = 25
-#서버 URL 설정
-url ='http://192.168.0.6:8080/iot/test1.html'
 
+acc = 1
 
+now = datetime.datetime.now()
+
+app = Flask(__name__)
 #############################################################################
 #사진촬영 함수 설정
 def securityshot ():
@@ -38,35 +42,28 @@ def securityshot ():
         camera.start_preview()
         time.sleep(1)
         camera.capture(file_name)
-#파일전송
-        files = {'file':open(file_name,'rb')}
-        print(file_name)
-        r=requests.post(url,files=files)
-        print(r.status_code)
-
 ################################################################################
 ################################################################################
 #영상 녹화 함수 설정
 def securityrec ():
     with picamera.PiCamera() as camera:
         camera.resolution = (320, 240)
-        #파일명 입력받기
-        file_name = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-        #프리뷰 화면
+    #파일명 입력받기
+        file_name2 = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+    #프리뷰 화면
         camera.start_preview()
-
-        #촬영과 저장
-        camera.start_recording(output = file_name+'.h264')
-        camera.wait_recording(10)
+    
+    #촬영과 저장
+        camera.start_recording(output = file_name2+'.h264')
+        camera.wait_recording(5)
         camera.stop_preview()
         camera.stop_recording()
-        #파일전송
-        files = {'file':open(file_name+'.h264','rb')}
-        print(file_name)
-        r=requests.post(url,files=files)
-        print(r.status_code)
+        
 ################################################################################
-
+################################################################################
+def streaming ():
+    subprocess.call('mjpg.sh')
+################################################################################
 print("Ultrasonic Distance Measurement")
  
 # 초음파를 내보낼 트리거 핀은 출력 모드로, 반사파를 수신할 에코 피은 입력 모드로 설정한다.
@@ -108,8 +105,9 @@ try:
             if 10 < distance <= 30:
                 securityshot()
                 print('shot')
-            elif distance <= 10:
+            elif distance <= 10 and acc == 1 :
                 securityrec()
+                streaming()
                 print('rec')
 
 except KeyboardInterrupt:   
